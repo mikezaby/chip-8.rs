@@ -30,9 +30,13 @@ impl Cpu {
     cpu
   }
 
+  pub fn emulate_cycle(&self) {
+    self.fetch_opcode();
   }
 
-  pub fn emulate_cycle(&self) {}
+  fn fetch_opcode(&self) {
+    self.opcode = (self.memory[self.pc_reg] << 8 | self.memory[self.pc_reg + 1]) as u16;
+  }
 }
 
 static fontset: [u8, ..80] = [0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70,
