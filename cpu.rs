@@ -30,11 +30,11 @@ impl Cpu {
     cpu
   }
 
-  pub fn emulate_cycle(&self) {
+  pub fn emulate_cycle(&mut self) {
     self.fetch_opcode();
   }
 
-  fn fetch_opcode(&self) {
+  fn fetch_opcode(&mut self) {
     self.opcode = (self.memory[self.pc_reg] << 8 | self.memory[self.pc_reg + 1]) as u16;
   }
 }
