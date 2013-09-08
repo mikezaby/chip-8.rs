@@ -184,8 +184,8 @@ impl Cpu {
   fn op_Dxxx(&mut self) {
     let from = self.i as uint;
     let to = from + (self.op_n() as uint);
-    let x = self.op_x();
-    let y = self.op_y();
+    let x = self.v[self.op_x()];
+    let y = self.v[self.op_y()];
     self.v[15] = self.display.draw(x, y, self.memory.slice(from, to));
     self.pc += 2;
   }
