@@ -4,6 +4,9 @@ pub mod cpu;
 
 fn main() {
   let mut cpu = Cpu::new();
-  cpu.emulate_cycle();
-  println(fmt!("%?", (0xFF << 8 | 0xff)));
+  cpu.load_game(~"games/ibm");
+  loop {
+    cpu.emulate_cycle();
+    cpu.display.draw_screen();
+  }
 }

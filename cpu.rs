@@ -1,5 +1,6 @@
 use self::display::Display;
 use std::rand;
+use std::io;
 
 pub mod display;
 
@@ -41,8 +42,24 @@ impl Cpu {
     self.fetch_opcode();
     self.opcode_execute();
   }
+
+  pub fn load_game(&mut self, game: ~str) {
+    let reader = io::file_reader(~Path(game)).unwrap();
+    self.load_to_memory(reader);
+  }
+  fn load_to_memory(&mut self, reader: &Reader) {
+    let byte = reader.read_byte();
+    if byte >= 0 {
+      self.memory[self.pc] = byte as u8;
+      self.pc += 1;
+      self.load_to_memory(reader)
+    }
+    else {
+      self.pc = 0x200;
+    }
+  }
   fn fetch_opcode(&mut self) {
-    self.opcode = (self.memory[self.pc] << 8 | self.memory[self.pc + 1]) as u16;
+    self.opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
   }
 
   fn opcode_execute(&mut self) {
@@ -63,7 +80,7 @@ impl Cpu {
       0xD000 => self.op_Dxxx(),
       0xE000 => self.op_Exxx(),
       0xF000 => self.op_Fxxx(),
-      _      => println("Not implemented")
+      _      => not_implemented(self.opcode as uint, self.pc as uint)
     }
   }
 
@@ -74,7 +91,7 @@ impl Cpu {
         self.sp -= 1;
         self.pc = self.stack[self.sp];
       }
-      _      => { not_implemented() }
+      _      => { not_implemented(self.opcode as uint, self.pc as uint) }
     }
     self.pc += 2;
   }
@@ -143,7 +160,7 @@ impl Cpu {
         self.v[15] = self.v[self.op_x()] & 0x80;
         self.v[15] <<= 1;
       }
-      _ => not_implemented()
+      _ => not_implemented(self.opcode as uint, self.pc as uint)
     }
     self.pc += 2;
   }
@@ -169,7 +186,6 @@ impl Cpu {
     let to = from + (self.op_n() as uint);
     let x = self.op_x();
     let y = self.op_y();
-
     self.v[15] = self.display.draw(x, y, self.memory.slice(from, to));
     self.pc += 2;
   }
@@ -197,7 +213,7 @@ impl Cpu {
       }
       0x55 => { for i in range(0u16, 16) { self.memory[self.i + i] = self.v[i] } }
       0x65 => { for i in range(0u16, 16) { self.v[i] = self.memory[self.i + i] } }
-      _    => { not_implemented() }
+      _    => { not_implemented(self.opcode as uint, self.pc as uint) }
     }
     self.pc += 2;
   }
@@ -219,7 +235,7 @@ impl Cpu {
   }
 }
 
-fn not_implemented() { println("Not implemented") }
+fn not_implemented(op: uint, pc: uint) { printfln!("Not implemented# op: %x, pc: %x", op, pc) }
 
 static fontset: [u8, ..80] = [0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70,
                               0xF0, 0x10, 0xF0, 0x80, 0xF0, 0xF0, 0x10, 0xF0, 0x10, 0xF0,
