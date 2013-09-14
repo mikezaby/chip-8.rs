@@ -145,28 +145,27 @@ impl Cpu {
   fn op_8xxx(&mut self) {
     match self.opcode & 0x000F {
       0 => { self.v[self.op_x()] = self.v[self.op_y()]; }
-      1 => { self.v[self.op_x()] = self.v[self.op_x()] | self.v[self.op_y()]; }
-      2 => { self.v[self.op_x()] = self.v[self.op_x()] & self.v[self.op_y()]; }
-      3 => { self.v[self.op_x()] = self.v[self.op_x()] ^ self.v[self.op_y()]; }
+      1 => { self.v[self.op_x()] |= self.v[self.op_y()]; }
+      2 => { self.v[self.op_x()] &= self.v[self.op_y()]; }
+      3 => { self.v[self.op_x()] ^= self.v[self.op_y()]; }
       4 => {
         self.v[self.op_x()] += self.v[self.op_y()];
         self.v[15] = if self.v[self.op_x()] < self.v[self.op_y()] { 1 } else { 0 };
       }
       5 => {
-        let temp_v = self.v[self.op_x()];
+        self.v[15] = if self.v[self.op_y()] > self.v[self.op_x()] { 0 } else { 1 };
         self.v[self.op_x()] -= self.v[self.op_y()];
-        self.v[15] = if self.v[self.op_x()] > temp_v { 0 } else { 1 };
       }
       6 => {
         self.v[15] = self.v[self.op_x()] & 0x1;
         self.v[self.op_x()] >>= 1;
       }
       7 => {
-        self.v[self.op_x()] = self.v[self.op_y()] - self.v[self.op_x()];
         self.v[15] = if self.v[self.op_x()] > self.v[self.op_y()] { 0 } else { 1 };
+        self.v[self.op_x()] = self.v[self.op_y()] - self.v[self.op_x()];
       }
       0xE => {
-        self.v[15] = self.v[self.op_x()] & 0x80;
+        self.v[15] = self.v[self.op_x()] >> 7;
         self.v[self.op_x()] <<= 1;
       }
       _ => not_implemented(self.opcode as uint, self.pc as uint)
@@ -221,14 +220,16 @@ impl Cpu {
         self.memory[self.i + 2] = (self.v[self.op_x()] % 100) % 10;
       }
       0x55 => {
-        for i in range(0u16, self.v[self.op_x()] as u16) {
+        for i in range(0u16, (self.op_x() as u16) + 1) {
           self.memory[self.i + i] = self.v[i]
         }
+        self.i += (self.op_x() as u16) + 1;
       }
       0x65 => {
-        for i in range(0u16, self.v[self.op_x()] as u16) {
+        for i in range(0u16, (self.op_x() as u16) + 1) {
           self.v[i] = self.memory[self.i + i]
         }
+        self.i += (self.op_x() as u16) + 1;
       }
       _    => { not_implemented(self.opcode as uint, self.pc as uint) }
     }
