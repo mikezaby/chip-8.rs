@@ -1,3 +1,5 @@
+use std::run;
+
 struct Display {
   gfx: [[u8, ..64], ..32],
   draw_flag: bool,
@@ -41,11 +43,12 @@ impl Display {
 
     for y in range(0, 32) {
       for x in range(0, 64) {
-        pixel = if self.gfx[y][x] != 0 { '*' } else { ' ' };
+        pixel = if self.gfx[y][x] != 0 { '█' } else { ' ' };
         self.screen.push_char(pixel);
       }
       self.screen.push_str("\n");
     }
+    run::process_status("clear", []);
     println(self.screen);
 
     self.draw_flag = false;
