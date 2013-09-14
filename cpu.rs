@@ -24,7 +24,7 @@ impl Cpu {
       opcode: 0,
       memory: [0, ..4096],
       v: [0, ..16],
-      i: 0,
+      i: 0x200,
       pc: 0x200,
       stack: [0, ..16],
       sp: 0,
@@ -41,6 +41,15 @@ impl Cpu {
   pub fn emulate_cycle(&mut self) {
     self.fetch_opcode();
     self.opcode_execute();
+
+    if self.delay_timer > 0 { self.delay_timer -= 1; }
+
+    if self.sound_timer > 0 {
+      if self.sound_timer == 1 { println("BEEP!\n"); }
+      self.sound_timer -= 1;
+    }
+
+    for i in range(0, 100000) { }
   }
 
   pub fn load_game(&mut self, game: ~str) {
