@@ -106,13 +106,13 @@ impl Cpu {
   }
 
   // Jumps to address
-  fn op_1xxx(&mut self) { self.pc = 0x0FFF & self.opcode; }
+  fn op_1xxx(&mut self) { self.pc = self.op_nnn(); }
 
   // Calls subroutine
   fn op_2xxx(&mut self) {
     self.stack[self.sp] = self.pc;
     self.sp += 1;
-    self.pc = 0x0FFF & self.opcode;
+    self.pc = self.op_nnn();
   }
 
   // Skips the next instruction if VX equals NN
@@ -155,11 +155,11 @@ impl Cpu {
       5 => {
         let temp_v = self.v[self.op_x()];
         self.v[self.op_x()] -= self.v[self.op_y()];
-        self.v[15] = if self.v[self.op_x()] > temp_v { 1 } else { 0 };
+        self.v[15] = if self.v[self.op_x()] > temp_v { 0 } else { 1 };
       }
       6 => {
         self.v[15] = self.v[self.op_x()] & 0x1;
-        self.v[15] >>= 1;
+        self.v[self.op_x()] >>= 1;
       }
       7 => {
         self.v[self.op_x()] = self.v[self.op_y()] - self.v[self.op_x()];
@@ -167,7 +167,7 @@ impl Cpu {
       }
       0xE => {
         self.v[15] = self.v[self.op_x()] & 0x80;
-        self.v[15] <<= 1;
+        self.v[self.op_x()] <<= 1;
       }
       _ => not_implemented(self.opcode as uint, self.pc as uint)
     }
@@ -220,8 +220,16 @@ impl Cpu {
         self.memory[self.i + 1] = (self.v[self.op_x()] / 10) % 10;
         self.memory[self.i + 2] = (self.v[self.op_x()] % 100) % 10;
       }
-      0x55 => { for i in range(0u16, 16) { self.memory[self.i + i] = self.v[i] } }
-      0x65 => { for i in range(0u16, 16) { self.v[i] = self.memory[self.i + i] } }
+      0x55 => {
+        for i in range(0u16, self.v[self.op_x()] as u16) {
+          self.memory[self.i + i] = self.v[i]
+        }
+      }
+      0x65 => {
+        for i in range(0u16, self.v[self.op_x()] as u16) {
+          self.v[i] = self.memory[self.i + i]
+        }
+      }
       _    => { not_implemented(self.opcode as uint, self.pc as uint) }
     }
     self.pc += 2;
