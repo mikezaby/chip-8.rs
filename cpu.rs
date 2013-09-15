@@ -1,8 +1,10 @@
 use self::display::Display;
+use self::keypad::Keypad;
 use std::rand;
 use std::io;
 
 pub mod display;
+pub mod keypad;
 
 struct Cpu {
   opcode: u16,
@@ -14,7 +16,7 @@ struct Cpu {
   sp: u16,
   delay_timer: u8,
   sound_timer: u8,
-  keypad: [u8, ..16],
+  keypad: Keypad,
   display: Display
 }
 
@@ -30,7 +32,7 @@ impl Cpu {
       sp: 0,
       delay_timer: 0,
       sound_timer: 0,
-      keypad: [0, ..16],
+      keypad: Keypad::new(),
       display: Display::new()
     };
 
@@ -49,7 +51,7 @@ impl Cpu {
       self.sound_timer -= 1;
     }
 
-    for i in range(0, 100000) { }
+    for i in range(0, 10000) { }
   }
 
   pub fn load_game(&mut self, game: ~str) {
@@ -200,8 +202,8 @@ impl Cpu {
 
   fn op_Exxx(&mut self) {
     self.pc += match self.opcode & 0x00FF {
-      0x9E => if self.keypad[self.v[self.op_x()]] != 0 { 4 } else { 2 },
-      0xA1 => if self.keypad[self.v[self.op_x()]] == 0 { 4 } else { 2 },
+      0x9E => if self.keypad.pressed(self.v[self.op_x()]) { 4 } else { 2 },
+      0xA1 => if !self.keypad.pressed(self.v[self.op_x()]) { 4 } else { 2 },
       _    => 2
     }
   }
@@ -244,13 +246,14 @@ impl Cpu {
 
   fn wait_keypress(&mut self) {
     for i in range(0u8, 16) {
-      if self.keypad[i] != 0 {
+      if self.keypad.pressed(i) {
         self.v[self.op_x()] = i;
         break;
       }
     }
     self.pc -= 2;
   }
+
 }
 
 fn not_implemented(op: uint, pc: uint) { printfln!("Not implemented# op: %x, pc: %x", op, pc) }
