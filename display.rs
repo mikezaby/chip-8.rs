@@ -1,10 +1,10 @@
-use sdl::video::*;
+use sdl::video;
 use sdl::Rect;
 
 struct Display {
   gfx: [[u8, ..64], ..32],
   draw_flag: bool,
-  screen: ~Surface
+  screen: ~video::Surface
 }
 
 static scale: int = 20;
@@ -14,7 +14,7 @@ impl Display {
     Display {
       gfx: [[0, ..64], ..32],
       draw_flag: true,
-      screen: set_video_mode(64*scale, 32*scale, 8, [HWSurface], [DoubleBuf]).unwrap()
+      screen: video::set_video_mode(64*scale, 32*scale, 8, [video::HWSurface], [video::DoubleBuf]).unwrap()
     }
   }
 
@@ -55,7 +55,7 @@ impl Display {
       for x in range(0i16, 64) {
         pixel = if self.gfx[y][x] != 0 { 255 } else { 0 };
         self.screen.fill_rect(Some(Rect { x: pt(x), y: pt(y), w: sc, h: sc}),
-                              RGB(pixel, pixel, pixel));
+                              video::RGB(pixel, pixel, pixel));
       }
     }
 

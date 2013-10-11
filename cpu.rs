@@ -256,7 +256,7 @@ impl Cpu {
 
 }
 
-fn not_implemented(op: uint, pc: uint) { printfln!("Not implemented# op: %x, pc: %x", op, pc) }
+fn not_implemented(op: uint, pc: uint) { println!("Not implemented:: op: {:x}, pc: {:x}", op, pc) }
 
 static fontset: [u8, ..80] = [0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70,
                               0xF0, 0x10, 0xF0, 0x80, 0xF0, 0xF0, 0x10, 0xF0, 0x10, 0xF0,
