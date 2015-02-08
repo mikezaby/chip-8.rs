@@ -1,0 +1,14 @@
+[package]
+
+name = "chip8"
+version = "0.0.1"
+authors = [ "mikezaby@gmail.com"  ]
+
+[[bin]]
+
+name = "chip8"
+path = "src/main.rs"
+
+[dependencies.sdl]
+
+git = "https://github.com/brson/rust-sdl.git"

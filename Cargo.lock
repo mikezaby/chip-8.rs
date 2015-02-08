@@ -1,0 +1,12 @@
+[root]
+name = "chip8"
+version = "0.0.1"
+dependencies = [
+ "sdl 0.3.6 (git+https://github.com/brson/rust-sdl.git)",
+]
+
+[[package]]
+name = "sdl"
+version = "0.3.6"
+source = "git+https://github.com/brson/rust-sdl.git#e4f4231b951dc176e399ad75a8a8f7f52f9a8a45"
+
