@@ -1,5 +1,7 @@
 use std::io::File;
+use std::io::fs::PathExtensions;
 use std::rand;
+use std::os;
 
 use display::Display;
 use keypad::Keypad;
@@ -53,18 +55,19 @@ impl Cpu {
     }
 
     pub fn load_game(&mut self, game: String) {
-        let mut reader = File::open(&Path::new(game)).unwrap();
+        let mut path = os::getcwd().unwrap();
+        path.push(game.trim());
+        let mut reader = File::open(&path).unwrap();
         self.load_to_memory(&mut reader);
     }
     fn load_to_memory(&mut self, reader: &mut File) {
-        let byte = reader.read_byte().unwrap();
-        if byte >= 0 {
-            self.memory[self.pc] = byte;
-            self.pc += 1;
-            self.load_to_memory(reader)
-        }
-        else {
-            self.pc = 0x200;
+        match reader.read_byte() {
+            Ok(value) => {
+                self.memory[self.pc] = value;
+                self.pc += 1;
+                self.load_to_memory(reader)
+            }
+            Err(e)   => {  self.pc = 0x200 }
         }
     }
     fn fetch_opcode(&mut self) {

@@ -12,7 +12,8 @@ mod keypad;
 fn main() {
     let mut cpu = Cpu::new();
 
-    let input_value = io::stdin().read_line().unwrap();
+    println!("Give the name of the game that you want to load:");
+    let input_value = io::stdin().read_line().ok().expect("Failed to read line");
     let game = format!("games/{}", input_value);
 
     cpu.load_game(game);
@@ -24,7 +25,7 @@ fn main() {
                 Event::Quit                  => break 'main,
                 Event::None                  => break 'event,
                 Event::Key(key, state, _, _) => cpu.keypad.press(key, state),
-                _                                  => {}
+                _                            => {}
             }
         }
 
